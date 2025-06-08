@@ -321,44 +321,125 @@ async def search_clauses(request: ClauseSearchRequest):
 
 @app.post("/api/v1/upload")
 async def upload_document(file: UploadFile = File(...)):
-    """Upload and analyze a document."""
+    """Upload and analyze a document with real PDF text extraction."""
     try:
         # Validate file type
         allowed_types = ["text/plain", "application/pdf", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"]
-        
+
         if file.content_type not in allowed_types:
             raise HTTPException(
-                status_code=400, 
+                status_code=400,
                 detail=f"Unsupported file type: {file.content_type}. Supported types: {', '.join(allowed_types)}"
             )
-        
-        # Read file content
+
+        # Validate file size (50MB limit)
         content = await file.read()
-        
+        if len(content) > 50 * 1024 * 1024:
+            raise HTTPException(
+                status_code=400,
+                detail="File size exceeds 50MB limit"
+            )
+
         # Extract text based on file type
+        extracted_text = ""
+        extraction_method = "unknown"
+
         if file.content_type == "text/plain":
-            text = content.decode("utf-8")
+            extracted_text = content.decode("utf-8")
+            extraction_method = "direct_text"
+
         elif file.content_type == "application/pdf":
-            # For demo, return mock text - in production, use PDF parsing
-            text = f"[PDF Content] Mock extracted text from {file.filename}. In production, this would contain the actual PDF text extracted using our advanced PDF parsing tools."
+            # Real PDF text extraction using PyPDF2
+            try:
+                import PyPDF2
+                import io
+
+                pdf_file = io.BytesIO(content)
+                pdf_reader = PyPDF2.PdfReader(pdf_file)
+
+                text_parts = []
+                for page_num, page in enumerate(pdf_reader.pages):
+                    try:
+                        page_text = page.extract_text()
+                        if page_text.strip():
+                            text_parts.append(f"--- Page {page_num + 1} ---\n{page_text}")
+                    except Exception as e:
+                        logger.warning(f"Failed to extract text from page {page_num + 1}: {e}")
+                        text_parts.append(f"--- Page {page_num + 1} ---\n[Text extraction failed for this page]")
+
+                if text_parts:
+                    extracted_text = "\n\n".join(text_parts)
+                    extraction_method = "pypdf2"
+                else:
+                    extracted_text = "[No text could be extracted from this PDF. The PDF might be image-based or encrypted.]"
+                    extraction_method = "pypdf2_failed"
+
+            except ImportError:
+                extracted_text = f"[PDF Processing] PDF text extraction from {file.filename}. PyPDF2 not available - using mock extraction."
+                extraction_method = "mock_pdf"
+            except Exception as e:
+                logger.error(f"PDF extraction failed: {e}")
+                extracted_text = f"[PDF Processing Error] Failed to extract text from {file.filename}. Error: {str(e)}"
+                extraction_method = "pypdf2_error"
+
+        elif file.content_type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+            # DOCX text extraction
+            try:
+                import docx
+                import io
+
+                docx_file = io.BytesIO(content)
+                doc = docx.Document(docx_file)
+
+                text_parts = []
+                for paragraph in doc.paragraphs:
+                    if paragraph.text.strip():
+                        text_parts.append(paragraph.text)
+
+                extracted_text = "\n".join(text_parts) if text_parts else "[No text found in DOCX document]"
+                extraction_method = "python_docx"
+
+            except ImportError:
+                extracted_text = f"[DOCX Processing] DOCX text extraction from {file.filename}. python-docx not available - using mock extraction."
+                extraction_method = "mock_docx"
+            except Exception as e:
+                logger.error(f"DOCX extraction failed: {e}")
+                extracted_text = f"[DOCX Processing Error] Failed to extract text from {file.filename}. Error: {str(e)}"
+                extraction_method = "docx_error"
         else:
-            # For other document types
-            text = f"[Document Content] Mock extracted text from {file.filename}. In production, this would contain the actual document text."
-        
-        # Analyze the document
-        analysis_request = DocumentAnalysisRequest(text=text)
+            extracted_text = f"[Document Content] Unsupported file type for text extraction: {file.content_type}"
+            extraction_method = "unsupported"
+
+        # Ensure we have some text to analyze
+        if not extracted_text.strip():
+            extracted_text = f"[Empty Document] No text content found in {file.filename}"
+
+        # Analyze the extracted text
+        analysis_request = DocumentAnalysisRequest(text=extracted_text)
         result = await analyze_document(analysis_request)
-        
+
+        # Add extraction metadata to the result
+        result.metadata.update({
+            "extracted_text": extracted_text[:1000] + "..." if len(extracted_text) > 1000 else extracted_text,
+            "extraction_method": extraction_method,
+            "original_filename": file.filename,
+            "file_size_bytes": len(content),
+            "pages_processed": len(extracted_text.split("--- Page")) - 1 if "--- Page" in extracted_text else 1
+        })
+
         return {
             "upload_info": {
                 "filename": file.filename,
                 "file_size": len(content),
                 "content_type": file.content_type,
-                "upload_timestamp": datetime.now().isoformat()
+                "upload_timestamp": datetime.now().isoformat(),
+                "extraction_method": extraction_method,
+                "text_length": len(extracted_text),
+                "pages_processed": result.metadata.get("pages_processed", 1)
             },
             "analysis": result
         }
-        
+
     except HTTPException:
         raise
     except Exception as e:

@@ -105,6 +105,8 @@ function DemoApp() {
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [apiStatus, setApiStatus] = useState<'unknown' | 'healthy' | 'error'>('unknown');
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   // Check API health on component mount
   React.useEffect(() => {
@@ -121,6 +123,55 @@ function DemoApp() {
     } catch (error) {
       setApiStatus('error');
       toast.error('Cannot connect to API. Please ensure the backend is running.');
+    }
+  };
+
+  const handleFileUpload = async (file: File) => {
+    if (!file) return;
+
+    // Validate file type
+    const allowedTypes = ['application/pdf', 'text/plain', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+    if (!allowedTypes.includes(file.type)) {
+      toast.error('Please upload a PDF, TXT, or DOCX file');
+      return;
+    }
+
+    // Validate file size (max 50MB)
+    if (file.size > 50 * 1024 * 1024) {
+      toast.error('File size must be less than 50MB');
+      return;
+    }
+
+    setUploadedFile(file);
+    setLoading(true);
+    setUploadProgress(0);
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await axios.post(`${API_BASE_URL}/api/v1/upload`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+        onUploadProgress: (progressEvent) => {
+          if (progressEvent.total) {
+            const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+            setUploadProgress(progress);
+          }
+        },
+      });
+
+      setAnalysisResult(response.data.analysis);
+      setDocumentText(response.data.analysis.metadata?.extracted_text || 'Text extracted from uploaded file');
+      toast.success(`File "${file.name}" analyzed successfully!`);
+    } catch (error) {
+      console.error('File upload failed:', error);
+      toast.error('File upload failed. Please try again.');
+      setUploadedFile(null);
+    } finally {
+      setLoading(false);
+      setUploadProgress(0);
     }
   };
 
@@ -218,19 +269,111 @@ This Agreement shall be governed by the laws of California.`;
                   📄 Document Analysis
                 </Typography>
                 
+                {/* File Upload Section */}
+                <Paper
+                  sx={{
+                    p: 3,
+                    mb: 2,
+                    border: '2px dashed #ccc',
+                    borderRadius: 2,
+                    textAlign: 'center',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                    '&:hover': {
+                      borderColor: '#1976d2',
+                      backgroundColor: '#f5f5f5'
+                    }
+                  }}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    const files = Array.from(e.dataTransfer.files);
+                    if (files.length > 0) {
+                      handleFileUpload(files[0]);
+                    }
+                  }}
+                  onDragOver={(e) => e.preventDefault()}
+                  onClick={() => document.getElementById('file-input')?.click()}
+                >
+                  <input
+                    id="file-input"
+                    type="file"
+                    accept=".pdf,.txt,.docx"
+                    style={{ display: 'none' }}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        handleFileUpload(file);
+                      }
+                    }}
+                  />
+
+                  <Typography variant="h6" gutterBottom>
+                    📄 Upload Legal Document
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" gutterBottom>
+                    Drag & drop a PDF, TXT, or DOCX file here, or click to browse
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    Supported formats: PDF, TXT, DOCX (max 50MB)
+                  </Typography>
+
+                  {uploadedFile && (
+                    <Box sx={{ mt: 2 }}>
+                      <Chip
+                        label={`📎 ${uploadedFile.name} (${(uploadedFile.size / 1024 / 1024).toFixed(2)} MB)`}
+                        color="primary"
+                        onDelete={() => {
+                          setUploadedFile(null);
+                          setDocumentText('');
+                          setAnalysisResult(null);
+                        }}
+                      />
+                    </Box>
+                  )}
+
+                  {loading && uploadProgress > 0 && (
+                    <Box sx={{ mt: 2 }}>
+                      <Typography variant="body2" gutterBottom>
+                        Uploading... {uploadProgress}%
+                      </Typography>
+                      <Box sx={{ width: '100%', bgcolor: 'grey.300', borderRadius: 1 }}>
+                        <Box
+                          sx={{
+                            width: `${uploadProgress}%`,
+                            height: 8,
+                            bgcolor: 'primary.main',
+                            borderRadius: 1,
+                            transition: 'width 0.3s ease'
+                          }}
+                        />
+                      </Box>
+                    </Box>
+                  )}
+                </Paper>
+
+                <Divider sx={{ my: 2 }}>
+                  <Typography variant="body2" color="text.secondary">
+                    OR
+                  </Typography>
+                </Divider>
+
                 <Box sx={{ mb: 2 }}>
-                  <Button 
-                    variant="outlined" 
+                  <Button
+                    variant="outlined"
                     onClick={loadSampleDocument}
                     sx={{ mr: 1 }}
                   >
                     Load Sample Document
                   </Button>
-                  <Button 
-                    variant="outlined" 
-                    onClick={() => setDocumentText('')}
+                  <Button
+                    variant="outlined"
+                    onClick={() => {
+                      setDocumentText('');
+                      setUploadedFile(null);
+                      setAnalysisResult(null);
+                    }}
                   >
-                    Clear
+                    Clear All
                   </Button>
                 </Box>
 
