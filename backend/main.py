@@ -53,6 +53,8 @@ nlp = None
 try:
     import spacy
     nlp = spacy.load("en_core_web_sm")
+    # Increase max_length to handle larger documents (5MB of text)
+    nlp.max_length = 5000000
     logger.info("✅ spaCy model loaded successfully")
 except Exception as e:
     logger.warning(f"⚠️ spaCy model not available: {e}")
@@ -414,6 +416,12 @@ async def upload_document(file: UploadFile = File(...)):
         if not extracted_text.strip():
             extracted_text = f"[Empty Document] No text content found in {file.filename}"
 
+        # Validate text length for processing
+        if len(extracted_text) > 2000000:  # 2MB text limit
+            # Truncate very long texts
+            extracted_text = extracted_text[:2000000] + "\n\n[Document truncated due to length - showing first 2MB of text]"
+            logger.warning(f"Document {file.filename} truncated due to length: {len(extracted_text)} characters")
+
         # Analyze the extracted text
         analysis_request = DocumentAnalysisRequest(text=extracted_text)
         result = await analyze_document(analysis_request)
@@ -435,9 +443,9 @@ async def upload_document(file: UploadFile = File(...)):
                 "upload_timestamp": datetime.now().isoformat(),
                 "extraction_method": extraction_method,
                 "text_length": len(extracted_text),
-                "pages_processed": result.metadata.get("pages_processed", 1)
+                "pages_processed": result.metadata.get("pages_processed", 1) if hasattr(result, 'metadata') else 1
             },
-            "analysis": result
+            "analysis": result.dict() if hasattr(result, 'dict') else result
         }
 
     except HTTPException:

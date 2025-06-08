@@ -1,0 +1,60 @@
+SOFTWARE LICENSE AGREEMENT
+
+This Software License Agreement ("Agreement") is entered into as of January 1, 2024, by and between TechCorp Inc., a Delaware corporation with its principal place of business at 123 Tech Street, San Francisco, CA 94105 ("Licensor"), and BusinessCorp LLC, a California limited liability company with its principal place of business at 456 Business Ave, Los Angeles, CA 90210 ("Licensee").
+
+RECITALS
+
+WHEREAS, Licensor has developed certain proprietary software known as "TechSuite Pro" (the "Software");
+
+WHEREAS, Licensee desires to obtain a license to use such Software for its business operations;
+
+NOW, THEREFORE, in consideration of the mutual covenants and agreements contained herein, the parties agree as follows:
+
+1. GRANT OF LICENSE
+
+Subject to the terms and conditions of this Agreement, Licensor hereby grants to Licensee a non-exclusive, non-transferable license to use the Software solely for Licensee's internal business purposes. This license does not include the right to sublicense, distribute, or modify the Software.
+
+2. TERM AND TERMINATION
+
+This Agreement shall commence on the Effective Date and shall continue for a period of three (3) years, unless earlier terminated in accordance with the provisions hereof. Either party may terminate this Agreement upon thirty (30) days written notice to the other party in the event of a material breach that remains uncured after such notice period.
+
+3. FEES AND PAYMENT TERMS
+
+In consideration for the license granted hereunder, Licensee shall pay Licensor an annual license fee of Fifty Thousand Dollars ($50,000), payable in advance on each anniversary of the Effective Date. Payment shall be due within thirty (30) days of invoice date. Late payments will incur a penalty of one and one-half percent (1.5%) per month.
+
+4. CONFIDENTIALITY
+
+Each party acknowledges that it may have access to confidential information of the other party. Such confidential information shall include, but not be limited to, technical data, trade secrets, know-how, research, product plans, products, services, customers, customer lists, markets, software, developments, inventions, processes, formulas, technology, designs, drawings, engineering, hardware configuration information, marketing, finances, or other business information. Each party agrees to maintain the confidentiality of such information for a period of five (5) years following the termination of this Agreement.
+
+5. LIMITATION OF LIABILITY
+
+IN NO EVENT SHALL EITHER PARTY'S LIABILITY UNDER THIS AGREEMENT EXCEED ONE HUNDRED THOUSAND DOLLARS ($100,000) IN THE AGGREGATE. IN NO EVENT SHALL EITHER PARTY BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, INCLUDING BUT NOT LIMITED TO LOSS OF PROFITS, DATA, OR USE, INCURRED BY THE OTHER PARTY OR ANY THIRD PARTY.
+
+6. INDEMNIFICATION
+
+Licensee agrees to indemnify, defend, and hold harmless Licensor from and against any and all claims, damages, losses, costs, and expenses (including reasonable attorneys' fees) arising out of or resulting from Licensee's use of the Software or breach of this Agreement.
+
+7. INTELLECTUAL PROPERTY
+
+Licensor retains all right, title, and interest in and to the Software, including all intellectual property rights therein. No title to or ownership of the Software is transferred to Licensee. All rights not expressly granted to Licensee are reserved by Licensor.
+
+8. GOVERNING LAW AND JURISDICTION
+
+This Agreement shall be governed by and construed in accordance with the laws of the State of California, without regard to its conflict of laws principles. Any disputes arising under this Agreement shall be resolved through binding arbitration in accordance with the rules of the American Arbitration Association.
+
+9. ENTIRE AGREEMENT
+
+This Agreement constitutes the entire agreement between the parties with respect to the subject matter hereof and supersedes all prior and contemporaneous agreements and understandings, whether oral or written.
+
+10. AMENDMENT
+
+This Agreement may not be amended except by a written instrument signed by both parties.
+
+IN WITNESS WHEREOF, the parties have executed this Agreement as of the date first written above.
+
+TECHCORP INC.                           BUSINESSCORP LLC
+
+By: _________________________           By: _________________________
+Name: John Smith                        Name: Jane Doe
+Title: Chief Executive Officer          Title: Chief Technology Officer
+Date: January 1, 2024                  Date: January 1, 2024
