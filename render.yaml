@@ -1,0 +1,52 @@
+# Render Blueprint for Legal Intelligence Platform
+# This file configures the deployment of both backend and frontend services
+
+services:
+  # Backend API Service
+  - type: web
+    name: legal-intelligence-api
+    runtime: python
+    plan: starter
+    region: oregon
+    rootDir: backend
+    buildCommand: |
+      pip install --upgrade pip
+      pip install -r requirements-render.txt
+      python -m spacy download en_core_web_sm
+    startCommand: python main.py
+    healthCheckPath: /health
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: PORT
+        value: 10000
+      - key: EURI_API_KEY
+        value: test-key
+      - key: SECRET_KEY
+        generateValue: true
+      - key: CORS_ORIGINS
+        value: "*"
+      - key: PYTHONPATH
+        value: /opt/render/project/src
+
+  # Frontend Static Site (Optional)
+  - type: static
+    name: legal-intelligence-frontend
+    runtime: node
+    plan: starter
+    region: oregon
+    rootDir: frontend
+    buildCommand: |
+      npm ci
+      npm run build
+    staticPublishPath: ./dist
+    envVars:
+      - key: VITE_API_URL
+        fromService:
+          type: web
+          name: legal-intelligence-api
+          property: host
+      - key: VITE_APP_NAME
+        value: Legal Intelligence Platform
+      - key: VITE_APP_VERSION
+        value: 1.0.0
