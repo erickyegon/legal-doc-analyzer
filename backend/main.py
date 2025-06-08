@@ -796,10 +796,11 @@ def generate_summary(text: str) -> str:
     return summary
 
 def assess_risks(clauses: List[Dict[str, Any]], text: str) -> Dict[str, Any]:
-    """Comprehensive legal risk assessment with professional insights."""
+    """Professional legal risk assessment with detailed scoring and explanations."""
     risk_counts = {"high": 0, "medium": 0, "low": 0}
     risk_factors = []
     recommendations = []
+    scoring_details = []
 
     # Count clause risks
     for clause in clauses:
@@ -808,100 +809,355 @@ def assess_risks(clauses: List[Dict[str, Any]], text: str) -> Dict[str, Any]:
 
     total_clauses = len(clauses)
 
-    # Analyze specific legal risks
+    # Initialize professional scoring system (0-100 scale)
+    completeness_score = 50  # Base score
+    clarity_score = 50
+    protection_score = 50
+    compliance_score = 50
+    enforceability_score = 50
+    scoring_details = []
 
+    # COMPLETENESS ANALYSIS (Critical legal elements present)
+    required_elements = {
+        "parties_identification": r'(?i)(?:between|client|attorney|party)',
+        "scope_of_services": r'(?i)(?:scope|services|representation|legal services)',
+        "fee_structure": r'(?i)(?:fee|payment|cost|retainer)',
+        "termination_clause": r'(?i)(?:terminat|end|withdraw|cancel)',
+        "governing_law": r'(?i)(?:governed|jurisdiction|law)',
+        "effective_date": r'(?i)(?:effective|commence|begin|date)',
+        "signatures": r'(?i)(?:sign|execute|agreement)',
+        "conditions": r'(?i)(?:condition|requirement|obligation)'
+    }
+
+    present_elements = 0
+    missing_elements = []
+
+    for element, pattern in required_elements.items():
+        if re.search(pattern, text):
+            present_elements += 1
+            completeness_score += 6  # +6 points per element (max 48 additional)
+        else:
+            missing_elements.append(element.replace('_', ' ').title())
+
+    completeness_percentage = min(100, completeness_score)
+    scoring_details.append({
+        "category": "Document Completeness",
+        "score": completeness_percentage,
+        "explanation": f"Document contains {present_elements}/{len(required_elements)} essential legal elements. " +
+                      (f"Missing: {', '.join(missing_elements)}" if missing_elements else "All key elements present."),
+        "impact": "high" if completeness_percentage < 60 else "medium" if completeness_percentage < 80 else "low"
+    })
+
+    # CLARITY AND SPECIFICITY ANALYSIS
+    clarity_factors = {
+        "specific_amounts": r'\$[\d,]+(?:\.\d{2})?',
+        "specific_dates": r'\b(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2},?\s+\d{4}\b|\d{1,2}[-/]\d{1,2}[-/]\d{2,4}',
+        "specific_timeframes": r'\b\d+\s+(?:days?|months?|years?|weeks?)\b',
+        "defined_terms": r'\([^)]*hereinafter[^)]*\)|"[^"]*"',
+        "numbered_sections": r'\b\d+\.\s+[A-Z]',
+        "contact_information": r'\(\d{3}\)\s*\d{3}[-.\s]?\d{4}|[\w\.-]+@[\w\.-]+\.\w+'
+    }
+
+    clarity_points = 0
+    clarity_explanations = []
+
+    for factor, pattern in clarity_factors.items():
+        matches = len(re.findall(pattern, text))
+        if matches > 0:
+            points = min(8, matches * 2)  # Max 8 points per factor
+            clarity_points += points
+            clarity_explanations.append(f"{factor.replace('_', ' ').title()}: {matches} instances (+{points} pts)")
+
+    clarity_score = min(100, 30 + clarity_points)  # Base 30 + up to 70 from factors
+    scoring_details.append({
+        "category": "Clarity & Specificity",
+        "score": clarity_score,
+        "explanation": f"Document specificity analysis: {'; '.join(clarity_explanations) if clarity_explanations else 'Limited specific details found'}",
+        "impact": "high" if clarity_score < 50 else "medium" if clarity_score < 75 else "low"
+    })
+
+    # CLIENT PROTECTION ANALYSIS
+    protection_factors = {
+        "fee_transparency": r'(?i)(?:fee|cost|expense)\s+(?:schedule|structure|breakdown)',
+        "refund_policy": r'(?i)(?:refund|return|reimburse)',
+        "liability_limitation": r'(?i)(?:limit|cap|maximum)\s+(?:of\s+)?liability',
+        "confidentiality": r'(?i)(?:confidential|privilege|private)',
+        "communication_rights": r'(?i)(?:inform|notify|update|communicate)',
+        "termination_rights": r'(?i)(?:terminat|withdraw|end)\s+(?:representation|agreement)',
+        "dispute_resolution": r'(?i)(?:arbitration|mediation|dispute\s+resolution)'
+    }
+
+    protection_points = 0
+    protection_explanations = []
+
+    for factor, pattern in protection_factors.items():
+        if re.search(pattern, text):
+            protection_points += 10
+            protection_explanations.append(f"{factor.replace('_', ' ').title()}: Present")
+        else:
+            protection_explanations.append(f"{factor.replace('_', ' ').title()}: Missing")
+
+    protection_score = min(100, 30 + protection_points)  # Base 30 + up to 70
+    scoring_details.append({
+        "category": "Client Protection",
+        "score": protection_score,
+        "explanation": f"Client protection measures: {'; '.join(protection_explanations)}",
+        "impact": "high" if protection_score < 60 else "medium" if protection_score < 80 else "low"
+    })
+
+    # COMPLIANCE AND PROFESSIONAL STANDARDS ANALYSIS
+    compliance_factors = {
+        "professional_rules": r'(?i)(?:professional|ethical|rules|standards)',
+        "bar_requirements": r'(?i)(?:bar|license|admission)',
+        "conflict_disclosure": r'(?i)(?:conflict|interest|disclosure)',
+        "client_funds": r'(?i)(?:trust|escrow|client\s+funds)',
+        "record_keeping": r'(?i)(?:record|file|document|maintain)',
+        "supervision": r'(?i)(?:supervis|oversight|review)'
+    }
+
+    compliance_points = 0
+    compliance_explanations = []
+
+    for factor, pattern in compliance_factors.items():
+        if re.search(pattern, text):
+            compliance_points += 12
+            compliance_explanations.append(f"{factor.replace('_', ' ').title()}: Addressed")
+
+    compliance_score = min(100, 28 + compliance_points)  # Base 28 + up to 72
+    scoring_details.append({
+        "category": "Professional Compliance",
+        "score": compliance_score,
+        "explanation": f"Professional standards compliance: {'; '.join(compliance_explanations) if compliance_explanations else 'Limited compliance provisions found'}",
+        "impact": "high" if compliance_score < 50 else "medium" if compliance_score < 75 else "low"
+    })
+
+    # ENFORCEABILITY ANALYSIS
+    enforceability_factors = {
+        "consideration": r'(?i)(?:consideration|payment|fee|exchange)',
+        "mutual_obligations": r'(?i)(?:both\s+parties|mutual|reciprocal)',
+        "legal_capacity": r'(?i)(?:capacity|authority|power)',
+        "lawful_purpose": r'(?i)(?:legal|lawful|legitimate)',
+        "written_agreement": r'(?i)(?:written|agreement|contract)',
+        "proper_execution": r'(?i)(?:sign|execute|witness|notari)'
+    }
+
+    enforceability_points = 0
+    enforceability_explanations = []
+
+    for factor, pattern in enforceability_factors.items():
+        if re.search(pattern, text):
+            enforceability_points += 12
+            enforceability_explanations.append(f"{factor.replace('_', ' ').title()}: Present")
+
+    enforceability_score = min(100, 28 + enforceability_points)
+    scoring_details.append({
+        "category": "Legal Enforceability",
+        "score": enforceability_score,
+        "explanation": f"Enforceability factors: {'; '.join(enforceability_explanations) if enforceability_explanations else 'Basic enforceability elements present'}",
+        "impact": "high" if enforceability_score < 60 else "medium" if enforceability_score < 80 else "low"
+    })
+
+    # SPECIFIC RISK ANALYSIS WITH DETAILED EXPLANATIONS
     # Fee and payment risks
     if re.search(r'(?i)non\s*[-\s]*transferrable\s+fee', text):
-        risk_factors.append("Non-transferable fees may limit client flexibility")
-        recommendations.append("Clarify fee refund policy if services are not completed")
+        risk_factors.append("Non-transferable fees may limit client flexibility and create financial risk if representation is terminated early")
+        recommendations.append("Request clarification on fee refund policy if services are not completed or representation is terminated")
 
     if re.search(r'(?i)no\s+guarantee\s+(?:of\s+)?(?:outcome|results?|success)', text):
-        risk_factors.append("No guarantee of outcome clause present")
-        recommendations.append("Understand that legal outcomes cannot be guaranteed")
+        risk_factors.append("No guarantee of outcome clause present - standard but important for client expectations")
+        recommendations.append("Understand that legal outcomes cannot be guaranteed, but ensure clear communication about case strategy and progress")
 
-    # Immigration-specific risks
+    # IMMIGRATION-SPECIFIC PROFESSIONAL ANALYSIS
     if re.search(r'(?i)uscis|immigration|visa|petition', text):
-        risk_factors.append("Immigration matter - subject to government processing delays")
-        recommendations.append("Monitor USCIS processing times and policy changes")
-        recommendations.append("Ensure all supporting documentation is complete and accurate")
+        risk_factors.append("Immigration matter - subject to federal agency processing delays, policy changes, and complex regulatory requirements")
+        recommendations.append("Monitor USCIS processing times and policy changes that may affect case timeline and strategy")
+        recommendations.append("Ensure all supporting documentation meets current USCIS requirements and is properly authenticated")
+        recommendations.append("Maintain backup documentation and prepare for potential Requests for Evidence (RFEs)")
 
-    # Scope limitation risks
+        # Immigration-specific scoring adjustments
+        if re.search(r'(?i)eb[-\s]*2|niw|national\s+interest\s+waiver', text):
+            risk_factors.append("EB-2 NIW petition involves complex legal standards requiring demonstration of national interest")
+            recommendations.append("Ensure comprehensive documentation of achievements, impact, and national interest benefit")
+
+    # SCOPE LIMITATION PROFESSIONAL ANALYSIS
     if re.search(r'(?i)(?:limited\s+to|does\s+not\s+include|separate\s+agreement\s+required)', text):
-        risk_factors.append("Limited scope of services - additional matters may require separate agreements")
-        recommendations.append("Clarify what services are and are not included")
+        risk_factors.append("Limited scope of services creates potential for additional costs and separate retainer agreements for related matters")
+        recommendations.append("Request detailed written clarification of what services are included and excluded from this agreement")
+        recommendations.append("Discuss potential related legal matters that may arise and associated costs")
 
-    # Termination and withdrawal risks
+    # TERMINATION AND WITHDRAWAL PROFESSIONAL ANALYSIS
     if re.search(r'(?i)terminat|withdraw', text):
-        risk_factors.append("Termination provisions present")
-        recommendations.append("Understand conditions under which representation may be terminated")
+        risk_factors.append("Termination provisions present - important for understanding circumstances under which representation may end")
+        recommendations.append("Understand specific conditions under which attorney may withdraw and client obligations upon termination")
+        recommendations.append("Clarify status of work product and files upon termination of representation")
 
-    # Professional responsibility risks
+    # PROFESSIONAL RESPONSIBILITY ANALYSIS
     if re.search(r'(?i)conflict\s+of\s+interest', text):
-        risk_factors.append("Conflict of interest provisions require attention")
-        recommendations.append("Disclose any potential conflicts of interest immediately")
+        risk_factors.append("Conflict of interest provisions require ongoing attention throughout representation")
+        recommendations.append("Disclose any potential conflicts of interest immediately and throughout the representation")
 
-    # Document complexity assessment
-    if len(text) > 5000:
-        risk_factors.append("Complex agreement - requires careful review")
-        recommendations.append("Take time to thoroughly review all terms and conditions")
+    # DOCUMENT COMPLETENESS ASSESSMENT
+    if len(text) < 1000:
+        risk_factors.append("Document appears incomplete - critical terms and conditions may be missing")
+        recommendations.append("Request complete agreement with all exhibits, schedules, and attachments")
+        recommendations.append("Verify this is the final, complete version of the agreement")
+    elif len(text) > 5000:
+        risk_factors.append("Complex agreement with extensive terms - requires thorough professional review")
+        recommendations.append("Allow adequate time for comprehensive review of all terms and conditions")
+        recommendations.append("Consider consulting with specialized counsel for complex provisions")
 
-    # Missing critical clauses (potential risks)
+    # CRITICAL CLAUSE ANALYSIS WITH PROFESSIONAL IMPLICATIONS
     critical_clauses = {
-        "confidentiality": r'(?i)confidential|privilege',
-        "liability": r'(?i)liability|damages',
-        "governing_law": r'(?i)governed\s+by|jurisdiction',
-        "fee_structure": r'(?i)fee|payment|cost'
+        "confidentiality": {
+            "pattern": r'(?i)confidential|privilege',
+            "risk": "Lack of confidentiality provisions may compromise attorney-client privilege protection"
+        },
+        "liability": {
+            "pattern": r'(?i)liability|damages|malpractice',
+            "risk": "Absence of liability provisions creates uncertainty about professional responsibility limits"
+        },
+        "governing_law": {
+            "pattern": r'(?i)governed\s+by|jurisdiction|venue',
+            "risk": "Missing governing law clause creates uncertainty about applicable legal standards and forum"
+        },
+        "fee_structure": {
+            "pattern": r'(?i)fee\s+(?:schedule|structure|breakdown)|hourly\s+rate|flat\s+fee',
+            "risk": "Unclear fee structure may lead to billing disputes and unexpected costs"
+        },
+        "communication": {
+            "pattern": r'(?i)communicat|report|update|inform',
+            "risk": "Lack of communication provisions may result in inadequate client updates"
+        }
     }
 
     missing_clauses = []
-    for clause_name, pattern in critical_clauses.items():
-        if not re.search(pattern, text):
+    for clause_name, clause_info in critical_clauses.items():
+        if not re.search(clause_info["pattern"], text):
             missing_clauses.append(clause_name.replace('_', ' ').title())
+            risk_factors.append(f"Missing {clause_name.replace('_', ' ')} provisions: {clause_info['risk']}")
 
     if missing_clauses:
-        risk_factors.append(f"Missing important clauses: {', '.join(missing_clauses)}")
-        recommendations.append("Consider requesting clarification on missing standard provisions")
+        recommendations.append(f"Request addition of missing critical provisions: {', '.join(missing_clauses)}")
+        recommendations.append("Standard professional service agreements should include comprehensive protection clauses")
 
-    # Determine overall risk level
-    base_risk_score = (risk_counts["high"] * 30 + risk_counts["medium"] * 15 + risk_counts["low"] * 5)
-    additional_risk_score = len(risk_factors) * 5
-    total_risk_score = min(100, base_risk_score + additional_risk_score)
+    # PROFESSIONAL OVERALL RISK ASSESSMENT WITH DETAILED SCORING
 
-    if total_risk_score >= 70 or risk_counts["high"] >= 3:
-        overall_risk = "high"
-        recommendations.insert(0, "HIGH PRIORITY: Seek immediate legal review before signing")
-    elif total_risk_score >= 40 or risk_counts["high"] > 0:
-        overall_risk = "medium"
-        recommendations.insert(0, "RECOMMENDED: Review with legal counsel before proceeding")
-    elif total_risk_score >= 20 or risk_counts["medium"] > 2:
-        overall_risk = "low-medium"
-        recommendations.insert(0, "SUGGESTED: Consider legal consultation for complex terms")
-    else:
+    # Calculate composite professional score
+    overall_professional_score = (
+        completeness_percentage * 0.25 +  # 25% weight
+        clarity_score * 0.20 +            # 20% weight
+        protection_score * 0.25 +         # 25% weight
+        compliance_score * 0.15 +         # 15% weight
+        enforceability_score * 0.15       # 15% weight
+    )
+
+    # Risk level determination based on professional standards
+    if overall_professional_score >= 85:
         overall_risk = "low"
-        recommendations.insert(0, "Standard agreement - review terms carefully")
+        risk_level_explanation = "Excellent professional agreement meeting high legal standards"
+        priority_action = "APPROVED: Well-drafted agreement suitable for execution"
+    elif overall_professional_score >= 70:
+        overall_risk = "low-medium"
+        risk_level_explanation = "Good professional agreement with minor areas for improvement"
+        priority_action = "RECOMMENDED: Minor revisions suggested before execution"
+    elif overall_professional_score >= 55:
+        overall_risk = "medium"
+        risk_level_explanation = "Adequate agreement with several areas requiring attention"
+        priority_action = "CAUTION: Significant revisions recommended before execution"
+    elif overall_professional_score >= 40:
+        overall_risk = "medium-high"
+        risk_level_explanation = "Below-standard agreement with multiple deficiencies"
+        priority_action = "WARNING: Major revisions required before execution"
+    else:
+        overall_risk = "high"
+        risk_level_explanation = "Inadequate agreement failing to meet professional standards"
+        priority_action = "CRITICAL: Complete revision required - do not execute in current form"
 
-    # Add standard professional recommendations
-    standard_recommendations = [
-        "Ensure you understand all terms before signing",
-        "Keep copies of all signed agreements and correspondence",
-        "Maintain regular communication with your attorney",
-        "Report any changes in circumstances that may affect your case"
+    # Additional risk factors based on clause analysis
+    base_risk_score = (risk_counts["high"] * 30 + risk_counts["medium"] * 15 + risk_counts["low"] * 5)
+
+    # Professional recommendations based on scoring
+    professional_recommendations = [priority_action]
+
+    # Add specific recommendations based on scoring categories
+    if completeness_percentage < 70:
+        professional_recommendations.append("CRITICAL: Address missing essential legal elements before proceeding")
+    if clarity_score < 60:
+        professional_recommendations.append("IMPORTANT: Request clarification of vague or ambiguous terms")
+    if protection_score < 60:
+        professional_recommendations.append("ESSENTIAL: Strengthen client protection provisions")
+    if compliance_score < 60:
+        professional_recommendations.append("REQUIRED: Ensure compliance with professional standards")
+    if enforceability_score < 60:
+        professional_recommendations.append("NECESSARY: Address enforceability concerns")
+
+    # Add context-specific recommendations
+    professional_recommendations.extend(recommendations[:5])  # Include specific risk recommendations
+
+    # Standard professional practice recommendations
+    standard_professional_recommendations = [
+        "Maintain detailed records of all communications and decisions",
+        "Ensure compliance with applicable state bar rules and regulations",
+        "Review agreement periodically for changes in law or circumstances",
+        "Seek second opinion for complex or unusual provisions"
     ]
 
-    recommendations.extend(standard_recommendations)
+    professional_recommendations.extend(standard_professional_recommendations)
+
+    # INCOMPLETE DOCUMENT ANALYSIS
+    document_status = "complete"
+    completeness_issues = []
+
+    if len(text) < 500:
+        document_status = "severely_incomplete"
+        completeness_issues.append("Document appears to be a fragment - missing substantial content")
+    elif len(text) < 1500:
+        document_status = "incomplete"
+        completeness_issues.append("Document appears incomplete - may be missing pages or sections")
+    elif "..." in text or text.endswith("r..."):
+        document_status = "truncated"
+        completeness_issues.append("Document appears to be truncated - content cut off")
+
+    if re.search(r'(?i)see\s+(?:exhibit|attachment|schedule|appendix)', text):
+        completeness_issues.append("References to external documents that are not included")
+
+    if not re.search(r'(?i)(?:signature|sign|execute)', text):
+        completeness_issues.append("No signature provisions found - may be missing signature page")
 
     return {
         "overall_risk": overall_risk,
         "risk_breakdown": risk_counts,
         "total_clauses": total_clauses,
         "risk_factors": risk_factors,
-        "recommendations": recommendations[:8],  # Limit to 8 most important recommendations
-        "risk_score": total_risk_score,
+        "recommendations": professional_recommendations[:12],  # Top 12 recommendations
+        "risk_score": int(overall_professional_score),
+        "professional_analysis": {
+            "overall_score": round(overall_professional_score, 1),
+            "risk_level_explanation": risk_level_explanation,
+            "priority_action": priority_action,
+            "scoring_breakdown": scoring_details,
+            "document_status": document_status,
+            "completeness_issues": completeness_issues,
+            "professional_standards_met": overall_professional_score >= 70,
+            "requires_legal_review": overall_professional_score < 55,
+            "execution_recommended": overall_professional_score >= 85
+        },
+        "detailed_scores": {
+            "completeness": round(completeness_percentage, 1),
+            "clarity": round(clarity_score, 1),
+            "client_protection": round(protection_score, 1),
+            "compliance": round(compliance_score, 1),
+            "enforceability": round(enforceability_score, 1)
+        },
         "risk_analysis": {
             "clause_based_risk": base_risk_score,
-            "content_based_risk": additional_risk_score,
+            "content_based_risk": len(risk_factors) * 5,
             "missing_clauses": missing_clauses,
-            "document_complexity": "high" if len(text) > 5000 else "medium" if len(text) > 2000 else "low"
+            "document_complexity": "high" if len(text) > 5000 else "medium" if len(text) > 2000 else "low",
+            "professional_grade": "excellent" if overall_professional_score >= 85 else
+                                 "good" if overall_professional_score >= 70 else
+                                 "adequate" if overall_professional_score >= 55 else
+                                 "poor" if overall_professional_score >= 40 else "inadequate"
         }
     }
 
