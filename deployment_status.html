@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Legal Intelligence Platform - Deployment Status</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .services {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .service-card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            border-left: 5px solid #1976d2;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .service-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .service-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .service-icon {
+            font-size: 2rem;
+            margin-right: 15px;
+        }
+        
+        .service-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-left: 10px;
+            animation: pulse 2s infinite;
+        }
+        
+        .status-checking {
+            background: #ffc107;
+        }
+        
+        .status-online {
+            background: #28a745;
+        }
+        
+        .status-offline {
+            background: #dc3545;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .service-url {
+            background: #e9ecef;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            margin: 15px 0;
+            word-break: break-all;
+        }
+        
+        .service-features {
+            list-style: none;
+            margin-top: 20px;
+        }
+        
+        .service-features li {
+            padding: 5px 0;
+            color: #666;
+        }
+        
+        .service-features li:before {
+            content: "✅ ";
+            margin-right: 8px;
+        }
+        
+        .test-button {
+            background: #1976d2;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-top: 15px;
+            transition: background 0.3s ease;
+        }
+        
+        .test-button:hover {
+            background: #1565c0;
+        }
+        
+        .test-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .test-results {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            display: none;
+        }
+        
+        .test-results.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .test-results.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .deployment-guide {
+            background: #e3f2fd;
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 30px;
+        }
+        
+        .guide-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1976d2;
+            margin-bottom: 20px;
+        }
+        
+        .guide-steps {
+            list-style: none;
+            counter-reset: step-counter;
+        }
+        
+        .guide-steps li {
+            counter-increment: step-counter;
+            margin-bottom: 15px;
+            padding-left: 40px;
+            position: relative;
+        }
+        
+        .guide-steps li:before {
+            content: counter(step-counter);
+            position: absolute;
+            left: 0;
+            top: 0;
+            background: #1976d2;
+            color: white;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        
+        .footer {
+            background: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            color: #666;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        @media (max-width: 768px) {
+            .services {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏛️ Legal Intelligence Platform</h1>
+            <p>Deployment Status Dashboard</p>
+        </div>
+        
+        <div class="content">
+            <div class="services">
+                <!-- Backend Service -->
+                <div class="service-card">
+                    <div class="service-header">
+                        <span class="service-icon">🔧</span>
+                        <span class="service-title">Backend API</span>
+                        <span class="status-indicator status-checking" id="backend-status"></span>
+                    </div>
+                    
+                    <div class="service-url" id="backend-url">
+                        https://legal-intelligence-api.onrender.com
+                    </div>
+                    
+                    <ul class="service-features">
+                        <li>FastAPI with automatic documentation</li>
+                        <li>6 Advanced AI Tools (PDF Parser, NER, Summarizer, etc.)</li>
+                        <li>spaCy NLP with English language model</li>
+                        <li>Legal clause detection and risk assessment</li>
+                        <li>Real-time document analysis</li>
+                        <li>Health monitoring and logging</li>
+                    </ul>
+                    
+                    <button class="test-button" onclick="testBackend()">Test Backend</button>
+                    <div class="test-results" id="backend-results"></div>
+                </div>
+                
+                <!-- Frontend Service -->
+                <div class="service-card">
+                    <div class="service-header">
+                        <span class="service-icon">🎨</span>
+                        <span class="service-title">Frontend UI</span>
+                        <span class="status-indicator status-checking" id="frontend-status"></span>
+                    </div>
+                    
+                    <div class="service-url" id="frontend-url">
+                        https://legal-intelligence-frontend.onrender.com
+                    </div>
+                    
+                    <ul class="service-features">
+                        <li>React 18 with TypeScript</li>
+                        <li>Material-UI professional components</li>
+                        <li>Document upload and analysis interface</li>
+                        <li>Real-time results visualization</li>
+                        <li>Responsive design for all devices</li>
+                        <li>Integrated with backend API</li>
+                    </ul>
+                    
+                    <button class="test-button" onclick="testFrontend()">Test Frontend</button>
+                    <div class="test-results" id="frontend-results"></div>
+                </div>
+            </div>
+            
+            <div class="deployment-guide">
+                <div class="guide-title">📋 Deployment Status</div>
+                <ol class="guide-steps">
+                    <li><strong>Backend Deployment:</strong> Deploy backend API to Render using the repository</li>
+                    <li><strong>Frontend Deployment:</strong> Deploy frontend as Static Site to Render</li>
+                    <li><strong>Environment Variables:</strong> Configure API URLs and settings</li>
+                    <li><strong>Testing:</strong> Verify both services are working correctly</li>
+                    <li><strong>Integration:</strong> Ensure frontend can communicate with backend</li>
+                    <li><strong>Production Ready:</strong> Platform ready for users</li>
+                </ol>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Legal Intelligence Platform - AI-powered legal document analysis</p>
+            <p>Built with FastAPI, React, and advanced AI tools</p>
+        </div>
+    </div>
+
+    <script>
+        const BACKEND_URL = 'https://legal-intelligence-api.onrender.com';
+        const FRONTEND_URL = 'https://legal-intelligence-frontend.onrender.com';
+        
+        // Check service status on page load
+        window.addEventListener('load', function() {
+            checkBackendStatus();
+            checkFrontendStatus();
+        });
+        
+        async function checkBackendStatus() {
+            const statusElement = document.getElementById('backend-status');
+            
+            try {
+                const response = await fetch(`${BACKEND_URL}/health`, {
+                    method: 'GET',
+                    mode: 'cors'
+                });
+                
+                if (response.ok) {
+                    statusElement.className = 'status-indicator status-online';
+                    statusElement.title = 'Backend is online and healthy';
+                } else {
+                    statusElement.className = 'status-indicator status-offline';
+                    statusElement.title = 'Backend is not responding correctly';
+                }
+            } catch (error) {
+                statusElement.className = 'status-indicator status-offline';
+                statusElement.title = 'Backend is offline or not deployed';
+            }
+        }
+        
+        async function checkFrontendStatus() {
+            const statusElement = document.getElementById('frontend-status');
+            
+            try {
+                const response = await fetch(FRONTEND_URL, {
+                    method: 'GET',
+                    mode: 'no-cors'
+                });
+                
+                // For no-cors, we can't check the actual response, but if no error is thrown,
+                // it means the service is reachable
+                statusElement.className = 'status-indicator status-online';
+                statusElement.title = 'Frontend is online and accessible';
+            } catch (error) {
+                statusElement.className = 'status-indicator status-offline';
+                statusElement.title = 'Frontend is offline or not deployed';
+            }
+        }
+        
+        async function testBackend() {
+            const button = document.querySelector('button[onclick="testBackend()"]');
+            const resultsElement = document.getElementById('backend-results');
+            
+            button.disabled = true;
+            button.textContent = 'Testing...';
+            resultsElement.style.display = 'none';
+            
+            try {
+                // Test health endpoint
+                const healthResponse = await fetch(`${BACKEND_URL}/health`);
+                const healthData = await healthResponse.json();
+                
+                // Test analysis endpoint
+                const analysisResponse = await fetch(`${BACKEND_URL}/api/v1/analyze`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        text: 'This agreement may be terminated upon 30 days notice.',
+                        analysis_type: 'comprehensive'
+                    })
+                });
+                
+                const analysisData = await analysisResponse.json();
+                
+                resultsElement.className = 'test-results success';
+                resultsElement.innerHTML = `
+                    ✅ Backend Test Successful<br>
+                    📊 Health Status: ${healthData.status}<br>
+                    🔍 Analysis Time: ${analysisData.processing_time.toFixed(2)}s<br>
+                    🏷️ Entities Found: ${analysisData.entities.length}<br>
+                    📋 Clauses Detected: ${analysisData.clauses.length}<br>
+                    ⚠️ Risk Level: ${analysisData.risk_assessment.overall_risk}
+                `;
+                resultsElement.style.display = 'block';
+                
+            } catch (error) {
+                resultsElement.className = 'test-results error';
+                resultsElement.innerHTML = `❌ Backend Test Failed<br>Error: ${error.message}`;
+                resultsElement.style.display = 'block';
+            }
+            
+            button.disabled = false;
+            button.textContent = 'Test Backend';
+        }
+        
+        async function testFrontend() {
+            const button = document.querySelector('button[onclick="testFrontend()"]');
+            const resultsElement = document.getElementById('frontend-results');
+            
+            button.disabled = true;
+            button.textContent = 'Testing...';
+            resultsElement.style.display = 'none';
+            
+            try {
+                const response = await fetch(FRONTEND_URL);
+                const text = await response.text();
+                
+                if (response.ok && text.includes('Legal Intelligence Platform')) {
+                    resultsElement.className = 'test-results success';
+                    resultsElement.innerHTML = `
+                        ✅ Frontend Test Successful<br>
+                        🌐 Status: HTTP ${response.status}<br>
+                        📄 Content Size: ${text.length} bytes<br>
+                        🎨 React App: Detected<br>
+                        🔗 <a href="${FRONTEND_URL}" target="_blank">Open Frontend</a>
+                    `;
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                resultsElement.style.display = 'block';
+                
+            } catch (error) {
+                resultsElement.className = 'test-results error';
+                resultsElement.innerHTML = `❌ Frontend Test Failed<br>Error: ${error.message}`;
+                resultsElement.style.display = 'block';
+            }
+            
+            button.disabled = false;
+            button.textContent = 'Test Frontend';
+        }
+        
+        // Auto-refresh status every 30 seconds
+        setInterval(() => {
+            checkBackendStatus();
+            checkFrontendStatus();
+        }, 30000);
+    </script>
+</body>
+</html>
