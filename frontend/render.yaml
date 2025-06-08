@@ -1,0 +1,44 @@
+# Render deployment configuration for Legal Intelligence Platform Frontend
+services:
+  - type: static
+    name: legal-intelligence-frontend
+    env: static
+    region: oregon
+    plan: starter
+    buildCommand: |
+      npm ci
+      npm run build
+    staticPublishPath: ./dist
+    pullRequestPreviewsEnabled: true
+    envVars:
+      - key: VITE_API_URL
+        value: https://legal-intelligence-api.onrender.com
+      - key: VITE_APP_NAME
+        value: "Legal Intelligence Platform"
+      - key: VITE_APP_VERSION
+        value: "1.0.0"
+      - key: VITE_ENABLE_ANALYTICS
+        value: "false"
+      - key: VITE_ENABLE_DEBUG
+        value: "false"
+      - key: VITE_MAX_FILE_SIZE
+        value: "52428800"
+      - key: VITE_THEME_MODE
+        value: "light"
+    headers:
+      - path: /*
+        name: X-Frame-Options
+        value: DENY
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /*
+        name: Referrer-Policy
+        value: strict-origin-when-cross-origin
+      - path: /*
+        name: Permissions-Policy
+        value: camera=(), microphone=(), geolocation=()
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html

@@ -1,0 +1,34 @@
+# Render deployment configuration for Legal Intelligence Platform Backend
+services:
+  - type: web
+    name: legal-intelligence-api
+    env: python
+    region: oregon
+    plan: starter
+    buildCommand: |
+      pip install --upgrade pip
+      pip install -r requirements.txt
+    startCommand: chmod +x start.sh && ./start.sh
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: PYTHONPATH
+        value: /opt/render/project/src
+      - key: DATABASE_URL
+        fromDatabase:
+          name: legal-intelligence-db
+          property: connectionString
+      - key: EURI_API_KEY
+        sync: false  # Set this manually in Render dashboard
+      - key: SECRET_KEY
+        generateValue: true
+      - key: CORS_ORIGINS
+        value: "https://legal-intelligence-frontend.onrender.com,https://legal-intelligence.onrender.com"
+    healthCheckPath: /health
+
+databases:
+  - name: legal-intelligence-db
+    databaseName: legal_intelligence
+    user: legal_intelligence_user
+    region: oregon
+    plan: starter

@@ -1,0 +1,55 @@
+# Legal Intelligence Platform - Render Deployment Requirements
+# Optimized for Render deployment with essential dependencies only
+
+# Core FastAPI and web framework
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+pydantic==2.5.0
+pydantic-settings==2.1.0
+
+# Database dependencies
+sqlalchemy==2.0.23
+alembic==1.13.1
+psycopg2-binary==2.9.9
+
+# Authentication and security
+python-jose[cryptography]==3.3.0
+python-multipart==0.0.6
+passlib[bcrypt]==1.7.4
+bcrypt==4.1.2
+
+# HTTP client and utilities
+requests==2.31.0
+httpx==0.25.2
+python-dotenv==1.0.0
+
+# Essential document processing
+PyPDF2==3.0.1
+python-docx==1.1.0
+pdfplumber==0.10.3
+pillow==10.1.0
+
+# Essential LangChain
+langchain==0.0.350
+langchain-core==0.1.23
+langchain-community==0.0.3
+
+# Essential NLP
+spacy==3.7.2
+nltk==3.8.1
+
+# Text processing
+regex==2023.10.3
+fuzzywuzzy==0.18.0
+python-Levenshtein==0.23.0
+
+# Vector database (lightweight)
+chromadb==0.4.18
+
+# Essential data processing
+numpy==1.24.3
+pandas==2.0.3
+
+# Additional utilities
+aiohttp==3.9.1
+aiofiles==23.2.1
