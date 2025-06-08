@@ -89,15 +89,66 @@ class HealthResponse(BaseModel):
     version: str
     services: Dict[str, Any]
 
-# Legal clause patterns (comprehensive)
+# Enhanced Legal clause patterns for professional analysis
 LEGAL_PATTERNS = {
+    "professional_services": {
+        "patterns": [
+            r"(?i)professional\s+service\s+agreement",
+            r"(?i)attorney\s+(?:will|shall)\s+provide\s+legal\s+services",
+            r"(?i)scope\s+of\s+(?:services|representation)",
+            r"(?i)legal\s+services\s+(?:in\s+connection\s+with|for|regarding)",
+            r"(?i)retained\s+counsel"
+        ],
+        "description": "Professional services and legal representation clauses",
+        "risk_level": "low",
+        "category": "service_definition"
+    },
+    "fee_structure": {
+        "patterns": [
+            r"(?i)professional\s+fee\s*s?",
+            r"(?i)(?:pay|payment\s+of)\s+(?:the\s+)?fee\s*s?",
+            r"(?i)non\s*[-\s]*transferrable\s+(?:professional\s+)?fee\s*s?",
+            r"(?i)retainer\s+fee",
+            r"(?i)hourly\s+rate",
+            r"(?i)\$[\d,]+(?:\.\d{2})?\s+(?:per\s+hour|fee|retainer)"
+        ],
+        "description": "Fee structure and payment terms",
+        "risk_level": "high",
+        "category": "financial_terms"
+    },
+    "conditions_precedent": {
+        "patterns": [
+            r"(?i)this\s+agreement\s+will\s+not\s+take\s+effect",
+            r"(?i)(?:until|unless)\s+client\s+(?:returns|signs|accepts)",
+            r"(?i)no\s+obligation\s+to\s+provide\s+(?:legal\s+)?services",
+            r"(?i)conditions?\s+precedent",
+            r"(?i)effective\s+(?:date|upon)"
+        ],
+        "description": "Conditions precedent and agreement effectiveness",
+        "risk_level": "medium",
+        "category": "contract_formation"
+    },
+    "immigration_services": {
+        "patterns": [
+            r"(?i)employment\s+based\s+(?:visa|petition)",
+            r"(?i)eb[-\s]*2\s+niw",
+            r"(?i)national\s+interest\s+waiver",
+            r"(?i)(?:visa|petition)\s+(?:filing|preparation)",
+            r"(?i)uscis\s+(?:filing|petition|application)",
+            r"(?i)academic\s+evaluation"
+        ],
+        "description": "Immigration and visa-related services",
+        "risk_level": "high",
+        "category": "specialized_services"
+    },
     "termination": {
         "patterns": [
-            r"(?i)\b(?:terminat|end|expir|cancel|dissolv)\w*\s+(?:this\s+)?(?:agreement|contract|lease)\b",
+            r"(?i)\b(?:terminat|end|expir|cancel|dissolv)\w*\s+(?:this\s+)?(?:agreement|contract|representation)\b",
             r"(?i)(?:upon|after|with)\s+(\d+)\s+(days?|months?|years?)\s+(?:written\s+)?notice",
-            r"(?i)terminat\w*\s+(?:for\s+)?(?:cause|breach|default|material\s+breach)"
+            r"(?i)terminat\w*\s+(?:for\s+)?(?:cause|breach|default|material\s+breach)",
+            r"(?i)withdrawal\s+of\s+(?:counsel|representation)"
         ],
-        "description": "Termination and cancellation clauses",
+        "description": "Termination and withdrawal clauses",
         "risk_level": "medium",
         "category": "contract_lifecycle"
     },
@@ -140,23 +191,79 @@ LEGAL_PATTERNS = {
         "risk_level": "high",
         "category": "intellectual_property"
     },
+    "client_obligations": {
+        "patterns": [
+            r"(?i)client\s+(?:agrees|shall|must|will)\s+(?:to\s+)?(?:provide|furnish|submit)",
+            r"(?i)client\s+(?:is\s+)?responsible\s+for",
+            r"(?i)client\s+(?:represents|warrants|acknowledges)",
+            r"(?i)cooperation\s+(?:of\s+)?(?:the\s+)?client"
+        ],
+        "description": "Client obligations and responsibilities",
+        "risk_level": "medium",
+        "category": "client_duties"
+    },
+    "attorney_obligations": {
+        "patterns": [
+            r"(?i)attorney\s+(?:agrees|shall|will)\s+(?:to\s+)?(?:provide|represent|defend)",
+            r"(?i)attorney\s+(?:is\s+)?responsible\s+for",
+            r"(?i)legal\s+counsel\s+(?:shall|will)",
+            r"(?i)professional\s+(?:standards|conduct|ethics)"
+        ],
+        "description": "Attorney obligations and professional duties",
+        "risk_level": "low",
+        "category": "attorney_duties"
+    },
+    "confidentiality": {
+        "patterns": [
+            r"(?i)(?:confidential|privileged)\s+(?:information|communications?)",
+            r"(?i)attorney[-\s]client\s+privilege",
+            r"(?i)confidentiality\s+(?:obligations?\s+)?(?:shall\s+)?(?:survive|remain\s+in\s+effect)\s+for\s+(\d+)\s+(years?|months?)",
+            r"(?i)(?:non-disclosure|nda)\s+(?:agreement|provision)"
+        ],
+        "description": "Confidentiality and privilege protections",
+        "risk_level": "high",
+        "category": "information_protection"
+    },
+    "limitation_of_liability": {
+        "patterns": [
+            r"(?i)(?:limit|cap|maximum)\s+(?:of\s+)?liability\s+(?:shall\s+)?(?:not\s+exceed|be\s+limited\s+to)\s+\$?([\d,]+)",
+            r"(?i)(?:exclud|disclaim|not\s+liable)\w*\s+(?:for\s+)?(?:any\s+)?(?:indirect|consequential|incidental|special|punitive)\s+damages",
+            r"(?i)no\s+guarantee\s+(?:of\s+)?(?:outcome|results?|success)"
+        ],
+        "description": "Liability limitations and disclaimers",
+        "risk_level": "high",
+        "category": "risk_management"
+    },
     "governing_law": {
         "patterns": [
             r"(?i)(?:governed\s+by|subject\s+to|construed\s+in\s+accordance\s+with)\s+(?:the\s+)?laws?\s+of\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)",
-            r"(?i)(?:exclusive\s+)?jurisdiction\s+(?:of\s+)?(?:the\s+)?courts?\s+(?:of\s+|in\s+)([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)"
+            r"(?i)(?:exclusive\s+)?jurisdiction\s+(?:of\s+)?(?:the\s+)?courts?\s+(?:of\s+|in\s+)([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)",
+            r"(?i)venue\s+(?:shall\s+be\s+)?(?:in\s+)?([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)"
         ],
-        "description": "Governing law and jurisdiction clauses",
+        "description": "Governing law, jurisdiction, and venue clauses",
         "risk_level": "low",
         "category": "legal_framework"
     },
     "dispute_resolution": {
         "patterns": [
             r"(?i)(?:binding\s+)?arbitration\s+(?:in\s+accordance\s+with|under|pursuant\s+to)\s+(?:the\s+)?(?:rules\s+of\s+)?([A-Z][A-Z]+|American\s+Arbitration\s+Association)",
-            r"(?i)(?:first\s+attempt\s+to\s+resolve|prior\s+to\s+litigation)\s+(?:through\s+)?mediation"
+            r"(?i)(?:first\s+attempt\s+to\s+resolve|prior\s+to\s+litigation)\s+(?:through\s+)?mediation",
+            r"(?i)dispute\s+resolution\s+(?:procedure|process|mechanism)"
         ],
-        "description": "Dispute resolution mechanisms",
+        "description": "Dispute resolution mechanisms and procedures",
         "risk_level": "medium",
         "category": "dispute_resolution"
+    },
+    "scope_limitations": {
+        "patterns": [
+            r"(?i)(?:limited\s+to|restricted\s+to|only\s+includes?)\s+(?:the\s+)?(?:following|services)",
+            r"(?i)does\s+not\s+include",
+            r"(?i)(?:excludes?|excluding)\s+(?:any\s+)?(?:other|additional)\s+(?:services|matters)",
+            r"(?i)separate\s+(?:agreement|retainer)\s+(?:required|necessary)"
+        ],
+        "description": "Scope limitations and service boundaries",
+        "risk_level": "medium",
+        "category": "service_definition"
     }
 }
 
@@ -455,42 +562,107 @@ async def upload_document(file: UploadFile = File(...)):
         raise HTTPException(status_code=500, detail=f"Upload failed: {str(e)}")
 
 def extract_entities(text: str) -> List[Dict[str, Any]]:
-    """Extract named entities from text using spaCy or regex fallback."""
+    """Extract meaningful legal entities from text using enhanced patterns."""
     entities = []
-    
-    if nlp:
-        # Use spaCy for advanced entity extraction
-        doc = nlp(text)
-        for ent in doc.ents:
-            entities.append({
-                "text": ent.text,
-                "label": ent.label_,
-                "description": spacy.explain(ent.label_) if hasattr(spacy, 'explain') else ent.label_,
-                "start": ent.start_char,
-                "end": ent.end_char,
-                "confidence": 0.9
-            })
-    else:
-        # Fallback regex-based entity extraction
-        patterns = {
-            "MONEY": r'\$[\d,]+(?:\.\d{2})?',
-            "DATE": r'\b(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2},?\s+\d{4}\b',
-            "PERCENT": r'\b\d+(?:\.\d+)?%\b',
-            "ORG": r'\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*\s+(?:Inc|LLC|Corp|Corporation|Company|Ltd)\b'
+
+    # Enhanced legal entity patterns
+    legal_patterns = {
+        "LAW_FIRM": {
+            "pattern": r'\b[A-Z][a-z]+(?:\s+[&]\s+[A-Z][a-z]+)*(?:\s+[A-Z][a-z]+)*,?\s+(?:P\.?L\.?|PLLC|LLP|LLC|PC|P\.A\.)\b',
+            "description": "Law firm or legal entity"
+        },
+        "PERSON_NAME": {
+            "pattern": r'\b[A-Z][a-z]+\s+[A-Z][a-z]+(?:\s+[A-Z][a-z]+)?\b(?=\s*\((?:hereinafter|Client|Attorney))',
+            "description": "Person name (client or attorney)"
+        },
+        "LEGAL_DOCUMENT": {
+            "pattern": r'(?i)\b(?:agreement|contract|petition|application|motion|brief|pleading|complaint|answer)\b',
+            "description": "Legal document type"
+        },
+        "VISA_TYPE": {
+            "pattern": r'(?i)\b(?:EB[-\s]*[12345]|H[-\s]*1B|L[-\s]*1|O[-\s]*1|NIW|PERM|I[-\s]*\d+)\b',
+            "description": "Immigration visa or form type"
+        },
+        "MONEY_AMOUNT": {
+            "pattern": r'\$[\d,]+(?:\.\d{2})?',
+            "description": "Monetary amount"
+        },
+        "PHONE_NUMBER": {
+            "pattern": r'\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}',
+            "description": "Phone number"
+        },
+        "ADDRESS": {
+            "pattern": r'\d+\s+[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*\s+(?:St|Street|Ave|Avenue|Rd|Road|Blvd|Boulevard|Suite|Ste)\.?\s*\d*',
+            "description": "Street address"
+        },
+        "STATE_ZIP": {
+            "pattern": r'\b[A-Z]{2}\s+\d{5}(?:-\d{4})?\b',
+            "description": "State and ZIP code"
+        },
+        "DATE_FORMAL": {
+            "pattern": r'\b(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2},?\s+\d{4}\b',
+            "description": "Formal date"
+        },
+        "TIME_PERIOD": {
+            "pattern": r'\b\d+\s+(?:days?|months?|years?|weeks?)\b',
+            "description": "Time period or duration"
+        },
+        "PROFESSIONAL_TITLE": {
+            "pattern": r'(?i)\b(?:attorney|counsel|lawyer|esquire|esq\.?|partner|associate)\b',
+            "description": "Professional legal title"
+        },
+        "COURT_REFERENCE": {
+            "pattern": r'(?i)\b(?:court|tribunal|judge|magistrate|jurisdiction)\b',
+            "description": "Court or judicial reference"
         }
-        
-        for label, pattern in patterns.items():
-            for match in re.finditer(pattern, text):
+    }
+
+    # First try spaCy if available for standard entities
+    if nlp:
+        try:
+            doc = nlp(text)
+            for ent in doc.ents:
+                # Filter for meaningful legal entities
+                if ent.label_ in ['PERSON', 'ORG', 'GPE', 'MONEY', 'DATE', 'TIME', 'LAW']:
+                    entities.append({
+                        "text": ent.text.strip(),
+                        "label": ent.label_,
+                        "description": spacy.explain(ent.label_) if hasattr(spacy, 'explain') else ent.label_,
+                        "start": ent.start_char,
+                        "end": ent.end_char,
+                        "confidence": 0.9,
+                        "source": "spacy"
+                    })
+        except Exception as e:
+            logger.warning(f"spaCy entity extraction failed: {e}")
+
+    # Add legal-specific pattern matching
+    for label, pattern_info in legal_patterns.items():
+        for match in re.finditer(pattern_info["pattern"], text):
+            matched_text = match.group().strip()
+            if len(matched_text) > 1:  # Filter out single characters
                 entities.append({
-                    "text": match.group(),
+                    "text": matched_text,
                     "label": label,
-                    "description": f"{label} entity",
+                    "description": pattern_info["description"],
                     "start": match.start(),
                     "end": match.end(),
-                    "confidence": 0.8
+                    "confidence": 0.85,
+                    "source": "legal_patterns"
                 })
-    
-    return entities
+
+    # Remove duplicates and sort by position
+    unique_entities = []
+    seen_texts = set()
+
+    for entity in sorted(entities, key=lambda x: x["start"]):
+        # Avoid duplicate entities (same text and similar position)
+        entity_key = (entity["text"].lower(), entity["start"] // 10)  # Group by 10-char windows
+        if entity_key not in seen_texts:
+            seen_texts.add(entity_key)
+            unique_entities.append(entity)
+
+    return unique_entities[:50]  # Limit to top 50 entities
 
 def detect_clauses(text: str) -> List[Dict[str, Any]]:
     """Detect legal clauses in text using pattern matching."""
@@ -514,71 +686,223 @@ def detect_clauses(text: str) -> List[Dict[str, Any]]:
     return clauses
 
 def generate_summary(text: str) -> str:
-    """Generate a summary of the document."""
-    sentences = [s.strip() for s in text.split('.') if s.strip()]
-    
-    if len(sentences) <= 3:
-        return text
-    
-    # Simple extractive summary - take first, middle, and last sentences
-    summary_sentences = [
-        sentences[0],
-        sentences[len(sentences)//2] if len(sentences) > 2 else "",
-        sentences[-1] if len(sentences) > 1 else ""
+    """Generate a meaningful legal document summary."""
+
+    # Identify document type
+    doc_type = "Legal Document"
+    if re.search(r'(?i)professional\s+service\s+agreement', text):
+        doc_type = "Professional Services Agreement"
+    elif re.search(r'(?i)employment\s+agreement', text):
+        doc_type = "Employment Agreement"
+    elif re.search(r'(?i)license\s+agreement', text):
+        doc_type = "License Agreement"
+    elif re.search(r'(?i)retainer\s+agreement', text):
+        doc_type = "Retainer Agreement"
+
+    # Extract key information
+    summary_parts = [f"Document Type: {doc_type}"]
+
+    # Extract parties
+    parties = []
+    party_patterns = [
+        r'(?i)between\s+([^,]+(?:,\s*[^,]+)*)\s+(?:\([^)]*\))?\s+and\s+([^,]+(?:,\s*[^,]+)*)',
+        r'(?i)client["\s]*:?\s*([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)',
+        r'(?i)attorney["\s]*:?\s*([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*(?:\s*,\s*[A-Z\.]+)*)'
     ]
-    
-    summary = '. '.join(s for s in summary_sentences if s)
-    
-    if len(summary) > 500:
-        summary = summary[:500] + "..."
-    
-    return summary or "Document summary not available."
+
+    for pattern in party_patterns:
+        matches = re.finditer(pattern, text)
+        for match in matches:
+            if len(match.groups()) >= 2:
+                parties.extend([match.group(1).strip(), match.group(2).strip()])
+            else:
+                parties.append(match.group(1).strip())
+
+    if parties:
+        unique_parties = list(dict.fromkeys(parties))[:3]  # Remove duplicates, limit to 3
+        summary_parts.append(f"Parties: {', '.join(unique_parties)}")
+
+    # Extract services
+    services = []
+    service_patterns = [
+        r'(?i)(?:provide|preparation|filing)\s+(?:of\s+)?([^.]+(?:visa|petition|application|evaluation)[^.]*)',
+        r'(?i)legal\s+services\s+(?:in\s+connection\s+with|for|regarding)\s+([^.]+)',
+        r'(?i)scope\s+of\s+services[^:]*:\s*([^.]+)'
+    ]
+
+    for pattern in service_patterns:
+        matches = re.finditer(pattern, text)
+        for match in matches:
+            service = match.group(1).strip()
+            if len(service) > 10 and len(service) < 200:
+                services.append(service)
+
+    if services:
+        summary_parts.append(f"Services: {services[0]}")
+
+    # Extract key terms
+    key_terms = []
+
+    # Look for fees
+    fee_matches = re.finditer(r'(?i)(?:fee|payment|retainer)[^.]*\$[\d,]+(?:\.\d{2})?[^.]*', text)
+    for match in fee_matches:
+        fee_text = match.group().strip()
+        if len(fee_text) < 150:
+            key_terms.append(f"Fee: {fee_text}")
+            break
+
+    # Look for important conditions
+    condition_matches = re.finditer(r'(?i)(?:this\s+agreement\s+will\s+not\s+take\s+effect|conditions?)[^.]*[^.]{10,100}', text)
+    for match in condition_matches:
+        condition = match.group().strip()
+        if len(condition) < 150:
+            key_terms.append(f"Condition: {condition}")
+            break
+
+    # Look for termination terms
+    termination_matches = re.finditer(r'(?i)(?:terminat|withdraw)[^.]*[^.]{10,100}', text)
+    for match in termination_matches:
+        termination = match.group().strip()
+        if len(termination) < 150:
+            key_terms.append(f"Termination: {termination}")
+            break
+
+    if key_terms:
+        summary_parts.extend(key_terms[:3])  # Limit to 3 key terms
+
+    # Extract important dates or deadlines
+    date_matches = re.finditer(r'(?i)(?:within|after|before)\s+\d+\s+(?:days?|months?|years?)[^.]*', text)
+    for match in date_matches:
+        date_term = match.group().strip()
+        if len(date_term) < 100:
+            summary_parts.append(f"Timeline: {date_term}")
+            break
+
+    # Combine summary
+    if len(summary_parts) > 1:
+        summary = ". ".join(summary_parts) + "."
+    else:
+        # Fallback to extractive summary
+        sentences = [s.strip() for s in text.split('.') if s.strip() and len(s.strip()) > 20]
+        if sentences:
+            summary = f"{doc_type}: " + ". ".join(sentences[:3]) + "."
+        else:
+            summary = f"{doc_type}: Document analysis completed."
+
+    # Ensure reasonable length
+    if len(summary) > 800:
+        summary = summary[:800] + "..."
+
+    return summary
 
 def assess_risks(clauses: List[Dict[str, Any]], text: str) -> Dict[str, Any]:
-    """Comprehensive risk assessment based on detected clauses and content."""
+    """Comprehensive legal risk assessment with professional insights."""
     risk_counts = {"high": 0, "medium": 0, "low": 0}
     risk_factors = []
-    
+    recommendations = []
+
+    # Count clause risks
     for clause in clauses:
         risk_level = clause.get("risk_level", "low")
         risk_counts[risk_level] += 1
-    
+
     total_clauses = len(clauses)
-    
-    # Determine overall risk
-    if risk_counts["high"] >= 3:
+
+    # Analyze specific legal risks
+
+    # Fee and payment risks
+    if re.search(r'(?i)non\s*[-\s]*transferrable\s+fee', text):
+        risk_factors.append("Non-transferable fees may limit client flexibility")
+        recommendations.append("Clarify fee refund policy if services are not completed")
+
+    if re.search(r'(?i)no\s+guarantee\s+(?:of\s+)?(?:outcome|results?|success)', text):
+        risk_factors.append("No guarantee of outcome clause present")
+        recommendations.append("Understand that legal outcomes cannot be guaranteed")
+
+    # Immigration-specific risks
+    if re.search(r'(?i)uscis|immigration|visa|petition', text):
+        risk_factors.append("Immigration matter - subject to government processing delays")
+        recommendations.append("Monitor USCIS processing times and policy changes")
+        recommendations.append("Ensure all supporting documentation is complete and accurate")
+
+    # Scope limitation risks
+    if re.search(r'(?i)(?:limited\s+to|does\s+not\s+include|separate\s+agreement\s+required)', text):
+        risk_factors.append("Limited scope of services - additional matters may require separate agreements")
+        recommendations.append("Clarify what services are and are not included")
+
+    # Termination and withdrawal risks
+    if re.search(r'(?i)terminat|withdraw', text):
+        risk_factors.append("Termination provisions present")
+        recommendations.append("Understand conditions under which representation may be terminated")
+
+    # Professional responsibility risks
+    if re.search(r'(?i)conflict\s+of\s+interest', text):
+        risk_factors.append("Conflict of interest provisions require attention")
+        recommendations.append("Disclose any potential conflicts of interest immediately")
+
+    # Document complexity assessment
+    if len(text) > 5000:
+        risk_factors.append("Complex agreement - requires careful review")
+        recommendations.append("Take time to thoroughly review all terms and conditions")
+
+    # Missing critical clauses (potential risks)
+    critical_clauses = {
+        "confidentiality": r'(?i)confidential|privilege',
+        "liability": r'(?i)liability|damages',
+        "governing_law": r'(?i)governed\s+by|jurisdiction',
+        "fee_structure": r'(?i)fee|payment|cost'
+    }
+
+    missing_clauses = []
+    for clause_name, pattern in critical_clauses.items():
+        if not re.search(pattern, text):
+            missing_clauses.append(clause_name.replace('_', ' ').title())
+
+    if missing_clauses:
+        risk_factors.append(f"Missing important clauses: {', '.join(missing_clauses)}")
+        recommendations.append("Consider requesting clarification on missing standard provisions")
+
+    # Determine overall risk level
+    base_risk_score = (risk_counts["high"] * 30 + risk_counts["medium"] * 15 + risk_counts["low"] * 5)
+    additional_risk_score = len(risk_factors) * 5
+    total_risk_score = min(100, base_risk_score + additional_risk_score)
+
+    if total_risk_score >= 70 or risk_counts["high"] >= 3:
         overall_risk = "high"
-        risk_factors.append("Multiple high-risk clauses detected")
-    elif risk_counts["high"] > 0:
-        overall_risk = "medium-high"
-        risk_factors.append("High-risk clauses present")
-    elif risk_counts["medium"] > 5:
+        recommendations.insert(0, "HIGH PRIORITY: Seek immediate legal review before signing")
+    elif total_risk_score >= 40 or risk_counts["high"] > 0:
         overall_risk = "medium"
-        risk_factors.append("Multiple medium-risk clauses")
-    elif risk_counts["medium"] > 0:
+        recommendations.insert(0, "RECOMMENDED: Review with legal counsel before proceeding")
+    elif total_risk_score >= 20 or risk_counts["medium"] > 2:
         overall_risk = "low-medium"
+        recommendations.insert(0, "SUGGESTED: Consider legal consultation for complex terms")
     else:
         overall_risk = "low"
-    
-    # Additional risk factors
-    if len(text) > 10000:
-        risk_factors.append("Complex document - requires thorough review")
-    
-    if any(word in text.lower() for word in ["penalty", "damages", "breach", "default"]):
-        risk_factors.append("Contains penalty or breach provisions")
-    
+        recommendations.insert(0, "Standard agreement - review terms carefully")
+
+    # Add standard professional recommendations
+    standard_recommendations = [
+        "Ensure you understand all terms before signing",
+        "Keep copies of all signed agreements and correspondence",
+        "Maintain regular communication with your attorney",
+        "Report any changes in circumstances that may affect your case"
+    ]
+
+    recommendations.extend(standard_recommendations)
+
     return {
         "overall_risk": overall_risk,
         "risk_breakdown": risk_counts,
         "total_clauses": total_clauses,
         "risk_factors": risk_factors,
-        "recommendations": [
-            "Review all high-risk clauses with legal counsel",
-            "Ensure compliance with applicable laws and regulations",
-            "Consider negotiating unfavorable terms",
-            "Implement proper contract management procedures"
-        ],
-        "risk_score": min(100, (risk_counts["high"] * 30 + risk_counts["medium"] * 15 + risk_counts["low"] * 5))
+        "recommendations": recommendations[:8],  # Limit to 8 most important recommendations
+        "risk_score": total_risk_score,
+        "risk_analysis": {
+            "clause_based_risk": base_risk_score,
+            "content_based_risk": additional_risk_score,
+            "missing_clauses": missing_clauses,
+            "document_complexity": "high" if len(text) > 5000 else "medium" if len(text) > 2000 else "low"
+        }
     }
 
 if __name__ == "__main__":
